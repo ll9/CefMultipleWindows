@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,9 +24,15 @@ namespace CefMultipleWindows
 
         public void InitializeChromium()
         {
-            CefSettings settings = new CefSettings();
-            // Initialize cef with the provided settings
-            Cef.Initialize(settings);
+            CefSettings settings = new CefSettings
+            {
+                // Set BrowserSubProcessPath based on app bitness at runtime
+                BrowserSubprocessPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+                                                   Environment.Is64BitProcess ? "x64" : "x86",
+                                                   "CefSharp.BrowserSubprocess.exe")
+            };
+            // Make sure you set performDependencyCheck false
+            Cef.Initialize(settings, performDependencyCheck: false, browserProcessHandler: null);
 
             var browser = new ChromiumWebBrowser("https://stackoverflow.com/questions/39032447/load-2-urls-at-the-same-time-in-different-instances-cefsharp");
             browser.Dock = DockStyle.Left;
